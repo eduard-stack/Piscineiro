@@ -19,7 +19,7 @@ const TelaLogout: React.FC = () => {
     signOut(auth)
       .then(() => {
         console.log('Usuário deslogado com sucesso.');
-        //navigation.navigate('Login');
+       
       })
       .catch((error) => {
         console.error('Erro ao deslogar:', error);

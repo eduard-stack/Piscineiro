@@ -1,5 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { auth } from '../services/firebaseConfig';
+
+// Telas
 import TelaLogin from '../screens/TelaLogin';
 import TelaCadastro from '../screens/TelaCadastro';
 import TelaRecuperarSenha from '../screens/TelaRecuperarSenha';
@@ -11,7 +15,7 @@ export type RootStackParamList = {
   TelaCadastro: undefined;
   TelaRecuperarSenha: undefined;
   TelaValidacaoUser: {
-    userData: {
+    userData?: {
       uid: string;
       nome: string;
       cpf: string;
@@ -33,8 +37,35 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const AppNavigator = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [initialRoute, setInitialRoute] = useState<keyof RootStackParamList>('TelaLogin');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (userAuth) => {
+      setUser(userAuth);
+      if (userAuth) {
+        if (userAuth.emailVerified) {
+          setInitialRoute('MainTabs');
+        } else {
+          setInitialRoute('TelaValidacaoUser');
+        }
+      } else {
+        setInitialRoute('TelaLogin');
+      }
+      setLoading(false);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  if (loading) {
+    // Você pode exibir um SplashScreen ou componente de carregamento aqui
+    return null;
+  }
+
   return (
-    <Stack.Navigator initialRouteName="TelaLogin" screenOptions={{ headerShown: false }}>
+    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initialRoute}>
       <Stack.Screen name="TelaLogin" component={TelaLogin} />
       <Stack.Screen name="TelaCadastro" component={TelaCadastro} />
       <Stack.Screen name="TelaRecuperarSenha" component={TelaRecuperarSenha} />
