@@ -19,6 +19,7 @@ type RootStackParamList = {
   TelaInicio: undefined;
   TelaRecuperarSenha: undefined;
   TelaCadastro: undefined;
+  MainTabs: undefined
 };
 
 const TelaLogin: React.FC = () => {
@@ -37,7 +38,7 @@ const TelaLogin: React.FC = () => {
 
     signInWithEmailAndPassword(auth, email, senha)
       .then(() => {
-        //navigation.navigate('Inicio');
+        navigation.navigate('MainTabs');
       })
       .catch((error) => {
         console.log('Erro de autenticação do Firebase:', error);

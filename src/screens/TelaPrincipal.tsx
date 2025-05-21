@@ -19,6 +19,7 @@ const TelaPrincipal: React.FC = () => {
     const auth = getAuth();
     signOut(auth)
       .then(() => {
+        navigation.navigate('TelaLogin');
         console.log('Usuário deslogado com sucesso.');
         
       })

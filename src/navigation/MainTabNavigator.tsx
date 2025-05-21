@@ -1,14 +1,60 @@
-
 import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import {
+  createBottomTabNavigator,
+  BottomTabBarButtonProps,
+} from '@react-navigation/bottom-tabs';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { View, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  Platform,
+} from 'react-native';
 
-// Telas (algumas ainda são placeholders)
+import { useNavigationState } from '@react-navigation/native';
+
 import TelaPrincipal from '../screens/TelaPrincipal';
-import TelaLogout from '../screens/TelaLogout'; // usado temporariamente para Favoritos e Perfil
+import TelaLogout from '../screens/TelaLogout';
+import TelaAgendar from '../screens/TelaAgendar';
 
 const Tab = createBottomTabNavigator();
+
+function CustomAgendarButton({ onPress }: BottomTabBarButtonProps) {
+  // Obtemos o estado da navegação para saber se estamos na aba "Agendar"
+  const selected = useNavigationState((state) => {
+    const currentRoute = state.routes[state.index];
+    return currentRoute.name === 'Agendar';
+  });
+
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.8}
+      style={styles.floatingButtonContainer}
+    >
+      <View
+        style={[
+          styles.floatingButton,
+          {
+            borderColor: selected ? 'blue' : 'gray',
+            shadowColor: selected ? 'blue' : '#000',
+            elevation: selected ? 10 : 8,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 5,
+          },
+        ]}
+      >
+        <Ionicons
+          name="calendar"
+          size={30}
+          color={selected ? 'blue' : 'black'}
+        />
+      </View>
+    </TouchableOpacity>
+  );
+}
 
 export default function MainTabNavigator() {
   return (
@@ -26,31 +72,19 @@ export default function MainTabNavigator() {
           backgroundColor: '#fff',
           elevation: 5,
         },
-        tabBarIcon: ({ focused, color, size }) => {
+        tabBarIcon: ({ focused }) => {
+          if (route.name === 'Agendar') return null;
+
           let iconName: keyof typeof Ionicons.glyphMap = 'home';
 
           if (route.name === 'Inicio') iconName = 'home';
           else if (route.name === 'Buscar') iconName = 'search';
-          else if (route.name === 'Agendar') iconName = 'calendar';
           else if (route.name === 'Favoritos') iconName = 'heart';
-          else if (route.name === 'Perfil') iconName = 'person';
 
-          // Ícone flutuante especial para a aba "Agendar"
-          if (route.name === 'Agendar') {
-            return (
-              <View style={styles.floatingButtonContainer}>
-                <TouchableOpacity activeOpacity={0.8} style={styles.floatingButton}>
-                  <Ionicons name={iconName} size={30} color="blue" />
-                </TouchableOpacity>
-              </View>
-            );
-          }
-
-          // Ícone com imagem de perfil
           if (route.name === 'Perfil') {
             return (
               <Image
-                source={{ uri: 'https://via.placeholder.com/30' }} // Substituir por foto do usuário futuramente
+                source={{ uri: 'https://via.placeholder.com/30' }}
                 style={{
                   width: 30,
                   height: 30,
@@ -62,14 +96,21 @@ export default function MainTabNavigator() {
             );
           }
 
-          // Ícones padrão
           return <Ionicons name={iconName} size={24} color={focused ? 'blue' : 'black'} />;
         },
       })}
     >
       <Tab.Screen name="Inicio" component={TelaPrincipal} />
       <Tab.Screen name="Buscar" component={TelaPrincipal} />
-      <Tab.Screen name="Agendar" component={TelaPrincipal} />
+
+      <Tab.Screen
+        name="Agendar"
+        component={TelaAgendar}
+        options={{
+          tabBarButton: (props) => <CustomAgendarButton {...props} />,
+        }}
+      />
+
       <Tab.Screen name="Favoritos" component={TelaLogout} />
       <Tab.Screen name="Perfil" component={TelaLogout} />
     </Tab.Navigator>
@@ -78,9 +119,10 @@ export default function MainTabNavigator() {
 
 const styles = StyleSheet.create({
   floatingButtonContainer: {
-    top: -20, // sobe o botão
+    top: -20,
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 10,
   },
   floatingButton: {
     width: 60,
@@ -89,10 +131,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 8,
     borderWidth: 2,
-    borderColor: 'blue',
   },
 });
-
-
