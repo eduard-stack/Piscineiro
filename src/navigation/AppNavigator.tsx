@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '../services/firebaseConfig';
+import type { Prestador } from '../screens/TelaSearch'; // ajuste o caminho se necessário
+
+
 
 // Telas
 import TelaLogin from '../screens/TelaLogin';
@@ -9,6 +12,9 @@ import TelaCadastro from '../screens/TelaCadastro';
 import TelaRecuperarSenha from '../screens/TelaRecuperarSenha';
 import TelaValidacaoUser from '../screens/TelaValidacaoUser';
 import MainTabNavigator from './MainTabNavigator';
+import TelaPerfilPrestador from '../screens/TelaPerfilPrestador'; // ajuste o caminho conforme seu projeto
+
+
 
 export type RootStackParamList = {
   TelaLogin: undefined;
@@ -32,6 +38,7 @@ export type RootStackParamList = {
     };
   };
   MainTabs: undefined;
+  TelaPerfilPrestador: { prestador: Prestador }; // ✅ Adicione esta linha
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -70,6 +77,8 @@ const AppNavigator = () => {
       <Stack.Screen name="TelaCadastro" component={TelaCadastro} />
       <Stack.Screen name="TelaRecuperarSenha" component={TelaRecuperarSenha} />
       <Stack.Screen name="TelaValidacaoUser" component={TelaValidacaoUser} />
+      <Stack.Screen name="TelaPerfilPrestador" component={TelaPerfilPrestador} />
+
       <Stack.Screen name="MainTabs" component={MainTabNavigator} />
     </Stack.Navigator>
   );

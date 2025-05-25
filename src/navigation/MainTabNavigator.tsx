@@ -17,6 +17,8 @@ import { useNavigationState } from '@react-navigation/native';
 import TelaPrincipal from '../screens/TelaPrincipal';
 import TelaLogout from '../screens/TelaLogout';
 import TelaAgendar from '../screens/TelaAgendar';
+import TelaSearch from '../screens/TelaSearch'; // ajuste o caminho conforme sua pasta
+
 
 const Tab = createBottomTabNavigator();
 
@@ -101,7 +103,7 @@ export default function MainTabNavigator() {
       })}
     >
       <Tab.Screen name="Inicio" component={TelaPrincipal} />
-      <Tab.Screen name="Buscar" component={TelaPrincipal} />
+      <Tab.Screen name="Buscar" component={TelaSearch} />
 
       <Tab.Screen
         name="Agendar"

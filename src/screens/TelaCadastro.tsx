@@ -265,7 +265,7 @@ const TelaCadastro: React.FC = () => {
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => navigation.navigate('TelaLogin')}>
-            <Text style={styles.cadastroText}>Já possui uma conta? <Text style={{ fontWeight: 'bold' }}>Faça Login</Text></Text>
+            <Text style={styles.cadastroText2}>Já possui uma conta? <Text style={{ fontWeight: 'bold' }}>Faça Login</Text></Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -338,6 +338,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 10,
     fontSize: 14,
+  },
+  cadastroText2: {
+    textAlign: 'center',
+    color: 'blue',
+    marginTop: 10,
   },
 });
 
