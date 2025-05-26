@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import {
-  SafeAreaView,
-  TextInput,
-  TouchableOpacity,
-  Text,
-  FlatList,
-  Image,
-  StyleSheet,
-  Alert,
-  View,
+    SafeAreaView,
+    TextInput,
+    TouchableOpacity,
+    Text,
+    FlatList,
+    Image,
+    StyleSheet,
+    Alert,
+    View,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { collection, getDocs, query, where } from 'firebase/firestore';
@@ -18,168 +18,175 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
 export type Prestador = {
-  id: string;
-  nome: string;
-  foto: string;
-  idade?: number;
-  cidadesAtendidas: string[];
-  servicos?: {
+    id: string;
     nome: string;
-    preco: number;
-  }[];
+    foto: string;
+    idade?: number;
+    cidades_atendidas: string[];
+    servicos?: {
+        nome: string;
+        preco: number;
+    }[];
 };
 
 const TelaSearch = () => {
-  const [cidade, setCidade] = useState('');
-  const [resultados, setResultados] = useState<Prestador[]>([]);
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+    const [cidade, setCidade] = useState('');
+    const [resultados, setResultados] = useState<Prestador[]>([]);
+    const [pesquisou, setPesquisou] = useState(false);
+    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  const buscarPrestadores = async () => {
-    if (!cidade.trim()) {
-      Alert.alert('Digite o nome de uma cidade');
-      return;
-    }
+    const buscarPrestadores = async () => {
+        if (!cidade.trim()) {
+            Alert.alert('Digite o nome de uma cidade');
+            return;
+        }
 
-    try {
-      const prestadoresRef = collection(db, 'prestadores');
-      const q = query(prestadoresRef, where('cidadesAtendidas', 'array-contains', cidade.trim()));
-      const querySnapshot = await getDocs(q);
+        try {
+            const prestadoresRef = collection(db, 'prestadores');
+            const q = query(prestadoresRef, where('cidades_atendidas', 'array-contains', cidade.trim()));
+            const querySnapshot = await getDocs(q);
 
-      const dados: Prestador[] = [];
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        dados.push({
-          id: doc.id,
-          nome: data.nome,
-          foto: data.foto,
-          idade: data.idade,
-          cidadesAtendidas: data.cidadesAtendidas,
-          servicos: data.servicos || [],
-        });
-      });
+            const dados: Prestador[] = [];
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                dados.push({
+                    id: doc.id,
+                    nome: data.nome,
+                    foto: data.foto,
+                    idade: data.idade,
+                    cidades_atendidas: data.cidades_atendidas,
+                    servicos: data.servicos || [],
+                });
+            });
 
-      setResultados(dados);
-    } catch (error) {
-      console.error('Erro ao buscar prestadores:', error);
-      Alert.alert('Erro ao buscar prestadores');
-    }
-  };
+            setResultados(dados);
+            setPesquisou(true);
+        } catch (error) {
+            console.error('Erro ao buscar prestadores:', error);
+            Alert.alert('Erro ao buscar prestadores');
+        }
+    };
 
-  const abrirPerfilPrestador = (prestador: Prestador) => {
-    navigation.navigate('TelaPerfilPrestador', { prestador });
-  };
+    const abrirPerfilPrestador = (prestador: Prestador) => {
+        navigation.navigate('TelaPerfilPrestador', { prestador });
+    };
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.label}>Enconte um prestador:</Text>
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Digite a sua cidade"
-          value={cidade}
-          onChangeText={setCidade}
-        />
-        <TouchableOpacity onPress={buscarPrestadores} style={styles.iconButton}>
-          <Feather name="search" size={24} color="#fff" />
-        </TouchableOpacity>
-      </View>
-
-      <FlatList
-        data={resultados}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <TouchableOpacity style={styles.card} onPress={() => abrirPerfilPrestador(item)}>
-            <Image source={{ uri: item.foto }} style={styles.image} />
-            <View style={styles.cardContent}>
-              <Text style={styles.nome}>{item.nome}</Text>
-              <TouchableOpacity style={styles.button}>
-                <Text style={styles.buttonText}>Agendar</Text>
-              </TouchableOpacity>
+    return (
+        <SafeAreaView style={styles.container}>
+            <Text style={styles.label}>Enconte um prestador:</Text>
+            <View style={styles.searchContainer}>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Digite a sua cidade aqui"
+                    value={cidade}
+                    onChangeText={setCidade}
+                    autoCorrect={false}
+                    keyboardType="default"
+                    textContentType="none"
+                />
+                <TouchableOpacity onPress={buscarPrestadores} style={styles.iconButton}>
+                    <Feather name="search" size={24} color="#fff" />
+                </TouchableOpacity>
             </View>
-          </TouchableOpacity>
-        )}
-        ListEmptyComponent={<Text style={styles.empty}>Nenhum prestador encontrado.</Text>}
-      />
-    </SafeAreaView>
-  );
+
+            {pesquisou && resultados.length === 0 ? (
+                <Text style={styles.empty}>Nenhum prestador encontrado.</Text>
+            ) : (
+                <FlatList
+                    data={resultados}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity style={styles.card} onPress={() => abrirPerfilPrestador(item)}>
+                            <Image source={{ uri: item.foto }} style={styles.image} />
+                            <View style={styles.cardContent}>
+                                <Text style={styles.nome}>{item.nome}</Text>
+                                <TouchableOpacity style={styles.button} onPress={() => abrirPerfilPrestador(item)}>
+                                    <Text style={styles.buttonText}>Agendar</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </TouchableOpacity>
+                    )}
+                />
+            )}
+        </SafeAreaView>
+    );
 };
 
 export default TelaSearch;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    paddingTop: 65, // Adiciona espaço extra no topo
-    backgroundColor: '#fff',
-  },
-  label: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 12,
-    textAlign: 'left',
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    marginBottom: 16,
-  },
-  input: {
-    flex: 1,
-    backgroundColor: '#eee',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    fontSize: 16,
-    elevation: 2, // sombra no Android
-    shadowColor: '#000', // sombra no iOS
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-  },
-  iconButton: {
-    backgroundColor: '#007bff',
-    padding: 12,
-    borderRadius: 8,
-    marginLeft: 8,
-    justifyContent: 'center',
-  },
-  card: {
-    flexDirection: 'row',
-    padding: 12,
-    backgroundColor: '#f8f8f8',
-    marginBottom: 12,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  image: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginRight: 12,
-  },
-  cardContent: {
-    flex: 1,
-  },
-  nome: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  button: {
-    marginTop: 8,
-    backgroundColor: '#28a745',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-    alignSelf: 'flex-start',
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  empty: {
-    textAlign: 'center',
-    marginTop: 1,
-    color: 'red',
-    fontSize: 14,
-    alignSelf: 'center',
-  },
+    container: {
+        flex: 1,
+        padding: 16,
+        paddingTop: 65,
+        backgroundColor: '#fff',
+    },
+    label: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 12,
+        textAlign: 'left',
+    },
+    searchContainer: {
+        flexDirection: 'row',
+        marginBottom: 16,
+    },
+    input: {
+        flex: 1,
+        backgroundColor: '#eee',
+        borderRadius: 8,
+        paddingHorizontal: 12,
+        fontSize: 16,
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+    },
+    iconButton: {
+        backgroundColor: '#007bff',
+        padding: 12,
+        borderRadius: 8,
+        marginLeft: 8,
+        justifyContent: 'center',
+    },
+    card: {
+        flexDirection: 'row',
+        padding: 12,
+        backgroundColor: '#f8f8f8',
+        marginBottom: 12,
+        borderRadius: 10,
+        alignItems: 'center',
+    },
+    image: {
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        marginRight: 12,
+    },
+    cardContent: {
+        flex: 1,
+    },
+    nome: {
+        fontSize: 18,
+        fontWeight: '600',
+    },
+    button: {
+        marginTop: 8,
+        backgroundColor: '#007bff',
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 6,
+        alignSelf: 'flex-start',
+    },
+    buttonText: {
+        color: '#fff',
+        fontWeight: '600',
+    },
+    empty: {
+        textAlign: 'center',
+        marginTop: 20,
+        color: 'red',
+        fontSize: 14,
+    },
 });
