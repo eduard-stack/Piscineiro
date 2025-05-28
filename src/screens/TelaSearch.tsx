@@ -24,9 +24,11 @@ export type Prestador = {
     idade?: number;
     cidades_atendidas: string[];
     servicos?: {
-        nome: string;
+        descricao: string;
         preco: number;
     }[];
+    horario_atendimento: string[]; // Ex: ['08:00', '18:00']
+    agendamentos: { data: string; hora: string }[];
 };
 
 const TelaSearch = () => {
@@ -56,6 +58,8 @@ const TelaSearch = () => {
                     idade: data.idade,
                     cidades_atendidas: data.cidades_atendidas,
                     servicos: data.servicos || [],
+                    horario_atendimento: data.horario_atendimento || [], // Garanta que exista, mesmo que vazio
+                    agendamentos: data.agendamentos || [], // Garanta que exista, mesmo que vazio
                 });
             });
 

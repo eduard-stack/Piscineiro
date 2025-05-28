@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native'; // <== importe useNavigation
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { FontAwesome } from '@expo/vector-icons';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../services/firebaseConfig';
@@ -24,8 +25,20 @@ type PerfilPrestadorRouteProp = RouteProp<RootStackParamList, 'TelaPerfilPrestad
 
 const PerfilPrestador = () => {
   const route = useRoute<PerfilPrestadorRouteProp>();
-  const navigation = useNavigation(); // <== useNavigation para navegação
-  const { prestador } = route.params;
+ const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+
+  const prestador = route.params?.prestador;
+
+if (!prestador) {
+  return (
+    <View style={styles.container}>
+      <Text style={{ textAlign: 'center', marginTop: 20 }}>
+        Prestador não encontrado.
+      </Text>
+    </View>
+  );
+}
+
 
   const [favorito, setFavorito] = useState(false);
   const [servicos, setServicos] = useState<any[]>([]);
@@ -71,7 +84,7 @@ const PerfilPrestador = () => {
   useEffect(() => {
     carregarServicos();
     verificarFavorito();
-  }, [prestador.id]);
+  }, [prestador?.id]);
 
   return (
     <View style={styles.container}>
@@ -134,10 +147,13 @@ const PerfilPrestador = () => {
         renderItem={({ item }) => (
           <View style={styles.card}>
             <View style={styles.servicoInfo}>
-              <Text style={styles.servicoNome}>{item.descricao}</Text>
+              <Text style={styles.servicoDescricao}>{item.descricao}</Text>
               <Text style={styles.servicoPreco}>R$ {item.preco.toFixed(2)}</Text>
             </View>
-            <TouchableOpacity style={styles.botaoAgendar}>
+            <TouchableOpacity 
+            style={styles.botaoAgendar}
+              onPress={() =>navigation.navigate('TelaAgendar', {prestador, servicoSelecionado: item,})} // Navegação para TelaAgendar
+    >
               <Text style={styles.botaoAgendarTexto}>Agendar</Text>
             </TouchableOpacity>
           </View>
@@ -225,7 +241,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 12,
   },
-  servicoNome: {
+  servicoDescricao: {
     fontSize: 16,
     fontWeight: '600',
     color: '#000',

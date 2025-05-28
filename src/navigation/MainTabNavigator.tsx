@@ -16,7 +16,7 @@ import { useNavigationState } from '@react-navigation/native';
 
 import TelaPrincipal from '../screens/TelaPrincipal';
 import TelaLogout from '../screens/TelaLogout';
-import TelaAgendar from '../screens/TelaAgendar';
+import TelaAgendar from '../screens/TelaAgendamentos';
 import TelaSearch from '../screens/TelaSearch'; // ajuste o caminho conforme sua pasta
 
 

@@ -13,6 +13,8 @@ import TelaRecuperarSenha from '../screens/TelaRecuperarSenha';
 import TelaValidacaoUser from '../screens/TelaValidacaoUser';
 import MainTabNavigator from './MainTabNavigator';
 import TelaPerfilPrestador from '../screens/TelaPerfilPrestador'; // ajuste o caminho conforme seu projeto
+import TelaAgendar from '../screens/TelaAgendar'; // ajuste o caminho se necessário
+
 
 
 
@@ -38,7 +40,8 @@ export type RootStackParamList = {
     };
   };
   MainTabs: undefined;
-  TelaPerfilPrestador: { prestador: Prestador }; // ✅ Adicione esta linha
+  TelaPerfilPrestador: { prestador: Prestador ;}; // ✅ Essa tela só recebe o prestador
+  TelaAgendar: { prestador: Prestador; servicoSelecionado: any }; // <-- Adicione isso
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -78,6 +81,7 @@ const AppNavigator = () => {
       <Stack.Screen name="TelaRecuperarSenha" component={TelaRecuperarSenha} />
       <Stack.Screen name="TelaValidacaoUser" component={TelaValidacaoUser} />
       <Stack.Screen name="TelaPerfilPrestador" component={TelaPerfilPrestador} />
+      <Stack.Screen name="TelaAgendar" component={TelaAgendar} />
 
       <Stack.Screen name="MainTabs" component={MainTabNavigator} />
     </Stack.Navigator>
