@@ -35,7 +35,7 @@ Para testar a funcionalidade de agendamento:
 
 Pré-requisitos:
 Certifique-se de ter Node.js, npm/Yarn e o Expo CLI (se estiver usando Expo) instalados.
-Clone este repositório: git clone <https://github.com/eduard-stack/Piscineiro>
+Clone este repositório: git clone <https://github.com/eduard-stack/Piscineiro/tree/main>
 Navegue até a pasta do projeto: cd Piscineiro
 Instale as dependências: npm install
 Certifique-se de que sua configuração do Firebase (firebaseConfig.js ou similar) está correta e que as coleções agendamentos, prestadores e clientes existem no seu projeto Firebase Firestore.
