@@ -9,40 +9,34 @@ import {
   Alert,
   Modal,
 } from 'react-native';
-import { RouteProp, useRoute, useNavigation } from '@react-navigation/native'; // <== importe useNavigation
+import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { FontAwesome } from '@expo/vector-icons';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../services/firebaseConfig';
-import {
-  adicionarFavorito,
-  removerFavorito,
-  estaFavorito,
-} from '../services/favoritosPrestadores';
+import { doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
+import { auth, db } from '../services/firebaseConfig';
+import { Timestamp } from "firebase/firestore";
 
 type PerfilPrestadorRouteProp = RouteProp<RootStackParamList, 'TelaPerfilPrestador'>;
 
 const PerfilPrestador = () => {
   const route = useRoute<PerfilPrestadorRouteProp>();
- const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const prestador = route.params?.prestador;
-
-if (!prestador) {
-  return (
-    <View style={styles.container}>
-      <Text style={{ textAlign: 'center', marginTop: 20 }}>
-        Prestador não encontrado.
-      </Text>
-    </View>
-  );
-}
-
 
   const [favorito, setFavorito] = useState(false);
   const [servicos, setServicos] = useState<any[]>([]);
   const [imagemAmpliada, setImagemAmpliada] = useState(false);
+
+  if (!prestador) {
+    return (
+      <View style={styles.container}>
+        <Text style={{ textAlign: 'center', marginTop: 20 }}>
+          Prestador não encontrado.
+        </Text>
+      </View>
+    );
+  }
 
   const carregarServicos = async () => {
     try {
@@ -50,7 +44,7 @@ if (!prestador) {
       const snapshot = await getDoc(docRef);
       if (snapshot.exists()) {
         const dados = snapshot.data();
-        setServicos(dados.servicos || []);
+        setServicos(Array.isArray(dados.servicos) ? dados.servicos : []);
       } else {
         console.warn('Prestador não encontrado');
       }
@@ -60,35 +54,68 @@ if (!prestador) {
   };
 
   const verificarFavorito = async () => {
-    const isFav = await estaFavorito(prestador.id);
-    setFavorito(isFav);
-  };
-
-  const alternarFavorito = async () => {
     try {
-      if (favorito) {
-        await removerFavorito(prestador.id);
-        setFavorito(false);
-        Alert.alert('Removido dos favoritos');
-      } else {
-        await adicionarFavorito(prestador.id);
-        setFavorito(true);
-        Alert.alert('Adicionado aos favoritos');
-      }
+      const user = auth.currentUser;
+      if (!user) return;
+
+     const favoritoDocId = `${user.uid}_${prestador.id}`;
+    const favoritoRef = doc(db, 'favoritos', favoritoDocId);
+    const docSnap = await getDoc(favoritoRef);
+
+      setFavorito(docSnap.exists());
     } catch (error) {
-      console.error('Erro ao alternar favorito:', error);
-      Alert.alert('Erro ao atualizar favorito');
+      console.error('Erro ao verificar favorito:', error);
     }
   };
 
-  useEffect(() => {
+  const alternarFavorito = async () => {
+  if (!auth.currentUser) {
+    alert("Você precisa estar logado para favoritar.");
+    return;
+  }
+
+  const userId = auth.currentUser.uid;
+  const favoritoDocId = `${userId}_${prestador.id}`; // chave única para evitar duplicados
+
+  const docRef = doc(db, "favoritos", favoritoDocId);
+  const docSnap = await getDoc(docRef);
+
+  try {
+    if (docSnap.exists()) {
+      // Já é favorito, vamos remover
+      await deleteDoc(docRef);
+      setFavorito(false);
+      Alert.alert("Removido dos favoritos", `${prestador.nome} foi removido da sua lista de favoritos.`);
+    } else {
+      // Não é favorito, vamos adicionar
+      await setDoc(docRef, {
+        userId: userId,
+        prestadorId: prestador.id,
+        nome: prestador.nome,
+        idade: prestador.idade || 0,
+        foto: prestador.foto,
+        dataAdicao: Timestamp.now(),
+      });
+      setFavorito(true);
+       Alert.alert("Adicionado aos favoritos", `${prestador.nome} foi adicionado à sua lista de favoritos.`);
+    }
+  } catch (error) {
+    console.error("Erro ao alternar favorito:", error);
+    alert("Erro ao salvar favorito. Tente novamente.");
+  }
+};
+
+
+ useEffect(() => {
+  if (prestador?.id) {
     carregarServicos();
     verificarFavorito();
-  }, [prestador?.id]);
+  }
+}, [prestador?.id]);
+
 
   return (
     <View style={styles.container}>
-      {/* Botão voltar */}
       <TouchableOpacity
         style={styles.botaoVoltar}
         onPress={() => navigation.goBack()}
@@ -97,7 +124,6 @@ if (!prestador) {
         <FontAwesome name="arrow-left" size={24} color="#000" />
       </TouchableOpacity>
 
-      {/* Cabeçalho */}
       <View style={styles.header}>
         <TouchableOpacity onPress={alternarFavorito} style={styles.favoritoBtn}>
           <FontAwesome
@@ -108,15 +134,22 @@ if (!prestador) {
           />
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => setImagemAmpliada(true)}>
-          <Image source={{ uri: prestador.foto }} style={styles.avatar} />
+        <TouchableOpacity
+          onPress={() => prestador.foto && setImagemAmpliada(true)}
+        >
+          {prestador.foto ? (
+            <Image source={{ uri: prestador.foto }} style={styles.avatar} />
+          ) : (
+            <View style={[styles.avatar, { backgroundColor: '#ccc', justifyContent: 'center', alignItems: 'center' }]}>
+              <FontAwesome name="user" size={40} color="#777" />
+            </View>
+          )}
         </TouchableOpacity>
 
-        <Text style={styles.nome}>{prestador.nome}</Text>
+        <Text style={styles.nome}>{prestador.nome || 'Nome não informado'}</Text>
         {prestador.idade && <Text style={styles.idade}>{prestador.idade} anos</Text>}
       </View>
 
-      {/* Modal da Imagem Ampliada */}
       <Modal
         visible={imagemAmpliada}
         transparent
@@ -140,20 +173,28 @@ if (!prestador) {
         </View>
       </Modal>
 
-      {/* Lista de serviços */}
       <FlatList
         data={servicos}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
           <View style={styles.card}>
             <View style={styles.servicoInfo}>
-              <Text style={styles.servicoDescricao}>{item.descricao}</Text>
-              <Text style={styles.servicoPreco}>R$ {item.preco.toFixed(2)}</Text>
+              <Text style={styles.servicoDescricao}>
+                {item?.descricao || 'Serviço sem descrição'}
+              </Text>
+              <Text style={styles.servicoPreco}>
+                R$ {item?.preco ? Number(item.preco).toFixed(2) : '0.00'}
+              </Text>
             </View>
-            <TouchableOpacity 
-            style={styles.botaoAgendar}
-              onPress={() =>navigation.navigate('TelaAgendar', {prestador, servicoSelecionado: item,})} // Navegação para TelaAgendar
-    >
+            <TouchableOpacity
+              style={styles.botaoAgendar}
+              onPress={() =>
+                navigation.navigate('TelaAgendar', {
+                  prestador,
+                  servicoSelecionado: item,
+                })
+              }
+            >
               <Text style={styles.botaoAgendarTexto}>Agendar</Text>
             </TouchableOpacity>
           </View>
@@ -178,7 +219,7 @@ const styles = StyleSheet.create({
   },
   botaoVoltar: {
     position: 'absolute',
-    top: 48, // ajuste conforme safe area/status bar
+    top: 48,
     left: 16,
     zIndex: 10,
     backgroundColor: 'rgba(255,255,255,0.9)',
@@ -190,9 +231,9 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   header: {
-    backgroundColor: '#FFD700',
+    backgroundColor: '#f1f1f1',
     alignItems: 'center',
-    paddingTop: 40,
+    paddingTop: 80,
     paddingBottom: 24,
     paddingHorizontal: 16,
     borderBottomLeftRadius: 20,
@@ -201,23 +242,24 @@ const styles = StyleSheet.create({
   },
   favoritoBtn: {
     position: 'absolute',
-    top: 40,
+    top: 60,
     right: 20,
+    
     zIndex: 2,
   },
   iconeFavorito: {
     textShadowColor: 'rgba(0,0,0,0.2)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
+    marginRight: 10,
   },
   avatar: {
     width: 100,
     height: 100,
     borderRadius: 50,
     borderWidth: 3,
-    borderColor: '#fff',
+    borderColor: '#007BFF',
     marginBottom: 12,
-    marginTop: 16,
   },
   nome: {
     fontSize: 22,

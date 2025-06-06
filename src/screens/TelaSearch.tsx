@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
     SafeAreaView,
     TextInput,
@@ -13,9 +13,12 @@ import {
 import { Feather } from '@expo/vector-icons';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../services/firebaseConfig';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { Dimensions } from 'react-native';
+
+const screenHeight = Dimensions.get('window').height;
 
 export type Prestador = {
     id: string;
@@ -36,6 +39,14 @@ const TelaSearch = () => {
     const [resultados, setResultados] = useState<Prestador[]>([]);
     const [pesquisou, setPesquisou] = useState(false);
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+    useFocusEffect(
+        useCallback(() => {
+            setResultados([]);
+            setCidade('');
+            setPesquisou(false);
+        }, [])
+    );
 
     const buscarPrestadores = async () => {
         if (!cidade.trim()) {
@@ -58,8 +69,8 @@ const TelaSearch = () => {
                     idade: data.idade,
                     cidades_atendidas: data.cidades_atendidas,
                     servicos: data.servicos || [],
-                    horario_atendimento: data.horario_atendimento || [], // Garanta que exista, mesmo que vazio
-                    agendamentos: data.agendamentos || [], // Garanta que exista, mesmo que vazio
+                    horario_atendimento: data.horario_atendimento || [],
+                    agendamentos: data.agendamentos || [],
                 });
             });
 
@@ -87,14 +98,26 @@ const TelaSearch = () => {
                     autoCorrect={false}
                     keyboardType="default"
                     textContentType="none"
+                    autoCapitalize="words"
                 />
                 <TouchableOpacity onPress={buscarPrestadores} style={styles.iconButton}>
                     <Feather name="search" size={24} color="#fff" />
                 </TouchableOpacity>
             </View>
 
+            {!pesquisou && (
+                <View style={styles.centeredImageContainer}>
+                    <Image
+                        source={require('../../assets/profissional_limpeza.jpg')} // Altere o caminho conforme necessário
+                        style={styles.centeredImage}
+                        resizeMode="cover"
+                    />
+                </View>
+            )}
+
             {pesquisou && resultados.length === 0 ? (
-                <Text style={styles.empty}>Nenhum prestador encontrado.</Text>
+                <Text style={styles.empty}>Ops! Nenhum Prestador Encontrado.😔Estamos trabalhando para expandir nossa rede! Que tal tentar novamente mais tarde ou buscar em cidades próximas?
+                </Text>
             ) : (
                 <FlatList
                     data={resultados}
@@ -153,6 +176,18 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         marginLeft: 8,
         justifyContent: 'center',
+    },
+    centeredImageContainer: {
+        alignItems: 'center',
+        marginTop: 40,
+        marginBottom: 24, // evita encostar no tab bar
+
+    },
+    centeredImage: {
+        width: '95%',           // ocupa 95% da largura da tela
+        height: screenHeight * 0.6, // 60% da altura da tela
+        opacity: 0.9,
+        borderRadius: 12,
     },
     card: {
         flexDirection: 'row',

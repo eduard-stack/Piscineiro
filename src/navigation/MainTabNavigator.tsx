@@ -16,17 +16,18 @@ import { useNavigationState } from '@react-navigation/native';
 
 import TelaPrincipal from '../screens/TelaPrincipal';
 import TelaLogout from '../screens/TelaLogout';
-import TelaAgendar from '../screens/TelaAgendamentos';
 import TelaSearch from '../screens/TelaSearch'; // ajuste o caminho conforme sua pasta
+import TelaMeusAgendamentos from '../screens/TelaMeusAgendamentos'; // ajuste o caminho conforme sua pasta
+import TelaFavoritos from '../screens/TelaFavoritos';
 
 
 const Tab = createBottomTabNavigator();
 
 function CustomAgendarButton({ onPress }: BottomTabBarButtonProps) {
-  // Obtemos o estado da navegação para saber se estamos na aba "Agendar"
+  // Obtemos o estado da navegação para saber se estamos na aba "MeusAgendamentos"
   const selected = useNavigationState((state) => {
     const currentRoute = state.routes[state.index];
-    return currentRoute.name === 'Agendar';
+    return currentRoute.name === 'MeusAgendamentos';
   });
 
   return (
@@ -50,7 +51,7 @@ function CustomAgendarButton({ onPress }: BottomTabBarButtonProps) {
       >
         <Ionicons
           name="calendar"
-          size={30}
+          size={27}
           color={selected ? 'blue' : 'black'}
         />
       </View>
@@ -65,9 +66,9 @@ export default function MainTabNavigator() {
         headerShown: false,
         tabBarShowLabel: false,
         tabBarStyle: {
-          height: 70,
+          height: 50,
           position: 'absolute',
-          bottom: 16,
+          bottom: 1,
           left: 16,
           right: 16,
           borderRadius: 35,
@@ -75,7 +76,7 @@ export default function MainTabNavigator() {
           elevation: 5,
         },
         tabBarIcon: ({ focused }) => {
-          if (route.name === 'Agendar') return null;
+          if (route.name === 'MeusAgendamentos') return null;
 
           let iconName: keyof typeof Ionicons.glyphMap = 'home';
 
@@ -106,14 +107,14 @@ export default function MainTabNavigator() {
       <Tab.Screen name="Buscar" component={TelaSearch} />
 
       <Tab.Screen
-        name="Agendar"
-        component={TelaAgendar}
+        name="MeusAgendamentos"
+        component={TelaMeusAgendamentos}
         options={{
           tabBarButton: (props) => <CustomAgendarButton {...props} />,
         }}
       />
 
-      <Tab.Screen name="Favoritos" component={TelaLogout} />
+      <Tab.Screen name="Favoritos" component={TelaFavoritos} />
       <Tab.Screen name="Perfil" component={TelaLogout} />
     </Tab.Navigator>
   );
@@ -121,14 +122,14 @@ export default function MainTabNavigator() {
 
 const styles = StyleSheet.create({
   floatingButtonContainer: {
-    top: -20,
+    top: -15,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10,
   },
   floatingButton: {
-    width: 60,
-    height: 60,
+    width: 50,
+    height: 50,
     borderRadius: 30,
     backgroundColor: '#fff',
     justifyContent: 'center',
