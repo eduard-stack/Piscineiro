@@ -19,6 +19,7 @@ import TelaLogout from '../screens/TelaLogout';
 import TelaSearch from '../screens/TelaSearch'; // ajuste o caminho conforme sua pasta
 import TelaMeusAgendamentos from '../screens/TelaMeusAgendamentos'; // ajuste o caminho conforme sua pasta
 import TelaFavoritos from '../screens/TelaFavoritos';
+import TelaPerfilUsuario from '../screens/TelaPerfilUsuario'; // ajuste o caminho conforme sua pasta
 
 
 const Tab = createBottomTabNavigator();
@@ -115,7 +116,7 @@ export default function MainTabNavigator() {
       />
 
       <Tab.Screen name="Favoritos" component={TelaFavoritos} />
-      <Tab.Screen name="Perfil" component={TelaLogout} />
+      <Tab.Screen name="Perfil" component={TelaPerfilUsuario} />
     </Tab.Navigator>
   );
 }
