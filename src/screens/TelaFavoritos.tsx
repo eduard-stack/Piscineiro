@@ -120,9 +120,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   titulo: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
     color: "#000",
+    marginTop: 33,
     marginBottom: 16,
     textAlign: "center",
   },

@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
     headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginTop: 5,
+    marginTop: 20,
     marginBottom: 12,
     color: '#333',
     textAlign: 'center',
