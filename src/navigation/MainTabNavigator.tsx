@@ -116,7 +116,12 @@ export default function MainTabNavigator() {
       />
 
       <Tab.Screen name="Favoritos" component={TelaFavoritos} />
-      <Tab.Screen name="Perfil" component={TelaPerfilUsuario} />
+      <Tab.Screen name="Perfil" component={TelaPerfilUsuario} options={{
+          tabBarStyle: { display: 'none' }, // <-- ADICIONE ESTA LINHA AQUI
+          // Se quiser que o ícone do perfil também não apareça na tab bar para esta tela,
+          // mesmo quando outras abas estiverem ativas (o que pode ser estranho para uma tela de perfil)
+          // tabBarButton: (props) => null, 
+        }}/>
     </Tab.Navigator>
   );
 }
